@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buckmoon Shooter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --void:#0c0f0a;
+    --panel:#12160f;
+    --ember:#d98a4a;
+    --olive:#4a5a3a;
+    --lime:#c9e86a;
+    --bone:#eef0e4;
+    --smoke:#8a9480;
+    --line:rgba(238,240,228,0.1);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--void);
+    color:var(--bone);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  .topo{
+    position:fixed; inset:0; z-index:0; opacity:0.35; pointer-events:none;
+  }
+  .topo path{
+    fill:none; stroke:var(--olive); stroke-width:1;
+    stroke-dasharray:2000; stroke-dashoffset:2000;
+    animation:draw 2.6s ease-out forwards;
+  }
+  .topo path:nth-child(2){ animation-delay:0.15s; }
+  .topo path:nth-child(3){ animation-delay:0.3s; }
+  .topo path:nth-child(4){ animation-delay:0.45s; }
+  .topo path:nth-child(5){ animation-delay:0.6s; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @media (prefers-reduced-motion: reduce){
+    .topo path{ animation:none; stroke-dashoffset:0; }
+  }
+
+  .wrap{ position:relative; z-index:1; max-width:920px; margin:0 auto; padding:0 28px; }
+
+  /* ---- persistent download button, fixed left corner ---- */
+  #downloadBtn{
+    position:fixed; top:22px; left:22px; z-index:50;
+    display:flex; align-items:center; gap:10px;
+    background:var(--lime); color:#12160c;
+    font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px;
+    padding:11px 18px 11px 14px;
+    border-radius:3px;
+    text-decoration:none;
+    box-shadow:0 6px 20px rgba(0,0,0,0.4);
+    border:1px solid rgba(0,0,0,0.15);
+  }
+  #downloadBtn svg{ width:16px; height:16px; flex-shrink:0; }
+  #downloadBtn:hover{ background:#d6f08a; }
+  #downloadBtn .sub{ display:block; font-weight:500; font-size:10.5px; color:#3a4230; margin-top:1px; }
+
+  header.hero{
+    padding:130px 0 90px;
+    border-bottom:1px solid var(--line);
+  }
+  .wordmark{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:13px;
+    letter-spacing:0.04em; color:var(--smoke); margin-bottom:56px;
+  }
+  .wordmark span{ color:var(--ember); }
+
+  h1.title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(52px, 9vw, 104px);
+    line-height:0.92;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+    color:var(--bone);
+    max-width:11ch;
+  }
+  h1.title .line2{ color:var(--ember); display:block; }
+
+  .tagline{
+    max-width:52ch;
+    font-size:17px;
+    color:#c4cabb;
+    margin-top:28px;
+  }
+
+  .hero-actions{
+    display:flex; gap:14px; margin-top:40px; flex-wrap:wrap;
+  }
+  .btn-primary, .btn-ghost{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:14px;
+    padding:13px 24px; border-radius:3px; text-decoration:none; display:inline-block;
+  }
+  .btn-primary{ background:var(--ember); color:#1a1206; }
+  .btn-primary:hover{ background:#e39a5e; }
+  .btn-ghost{ border:1px solid var(--line); color:var(--bone); }
+  .btn-ghost:hover{ border-color:var(--smoke); }
+
+  section{ padding:80px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+
+  .section-label{
+    font-size:12.5px; color:var(--smoke); font-weight:600; margin-bottom:10px;
+  }
+  h2{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800; font-size:clamp(30px, 4vw, 42px);
+    text-transform:uppercase; letter-spacing:0.01em;
+    max-width:16ch; margin-bottom:36px;
+  }
+
+  .modes{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .mode-card{ background:var(--panel); padding:32px; }
+  .mode-card .tag{
+    display:inline-block; font-size:11.5px; font-weight:600; padding:4px 10px;
+    border-radius:2px; margin-bottom:18px;
+  }
+  .mode-card.solo .tag{ background:rgba(217,138,74,0.18); color:var(--ember); }
+  .mode-card.pvp .tag{ background:rgba(201,232,106,0.15); color:var(--lime); }
+  .mode-card h3{
+    font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:26px;
+    text-transform:uppercase; margin-bottom:12px;
+  }
+  .mode-card p{ color:#c4cabb; font-size:14.5px; max-width:38ch; }
+  @media (max-width:640px){ .modes{ grid-template-columns:1fr; } }
+
+  .loadout-list{ display:flex; flex-direction:column; }
+  .loadout-row{
+    display:grid; grid-template-columns:200px 1fr; gap:24px;
+    padding:22px 0; border-top:1px solid var(--line);
+  }
+  .loadout-row:last-child{ border-bottom:1px solid var(--line); }
+  .loadout-row .name{ font-weight:600; color:var(--bone); font-size:15px; }
+  .loadout-row .desc{ color:#a9b09c; font-size:14.5px; }
+  @media (max-width:600px){
+    .loadout-row{ grid-template-columns:1fr; gap:6px; }
+  }
+
+  .run-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px;
+  }
+  @media (max-width:640px){ .run-grid{ grid-template-columns:1fr; } }
+  .run-grid h4{ font-size:14px; color:var(--ember); margin-bottom:14px; font-weight:600; }
+  .keycap-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .keycap{
+    border:1px solid var(--line); border-radius:3px; padding:6px 11px;
+    font-size:12.5px; color:var(--bone); background:rgba(255,255,255,0.02);
+  }
+  .run-grid ul{ list-style:none; color:#a9b09c; font-size:14.5px; }
+  .run-grid li{ padding:6px 0; border-top:1px solid var(--line); }
+  .run-grid li:first-child{ border-top:none; }
+
+  .note{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px;
+    padding:20px 22px; font-size:13.5px; color:#a9b09c; margin-top:20px;
+  }
+  .note strong{ color:var(--bone); }
+
+  footer{
+    padding:50px 0 70px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  footer .foot-word{ font-size:13px; color:var(--smoke); }
+  footer a{ color:var(--lime); text-decoration:none; font-size:13.5px; font-weight:600; }
+</style>
+</head>
+<body>
+
+<svg class="topo" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+  <path d="M-50,120 C 200,60 400,180 650,110 S 1100,40 1260,140"/>
+  <path d="M-50,260 C 220,340 460,220 700,300 S 1080,380 1260,290"/>
+  <path d="M-50,460 C 260,400 480,520 720,440 S 1000,360 1260,470"/>
+  <path d="M-50,620 C 240,700 500,600 760,680 S 1050,760 1260,650"/>
+  <path d="M-50,800 C 220,760 470,860 700,790 S 1080,720 1260,820"/>
+</svg>
+
+<a id="downloadBtn" href="signal-run.html" download="buckmoon-shooter.html">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#12160c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M6 11l6 6 6-6"/><path d="M4 20h16"/></svg>
+  <span>Download<span class="sub">Play offline, no install</span></span>
+</a>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="wordmark">FIELD DOSSIER — <span>CHECKPOINT ASH</span></div>
+    <h1 class="title">Hold the<span class="line2">Line.</span></h1>
+    <p class="tagline">Buckmoon Shooter is a tactical browser shooter that runs from a single file — no install, no account. Defend a checkpoint alone against five hostile waves, or drop into the same arena against another player over the internet.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="signal-run.html">Play in Browser</a>
+      <a class="btn-ghost" href="#modes">See What's In It</a>
+    </div>
+  </header>
+
+  <section id="modes">
+    <div class="section-label">Two ways to deploy</div>
+    <h2>Pick your engagement</h2>
+    <div class="modes">
+      <div class="mode-card solo">
+        <span class="tag">SOLO OPS</span>
+        <h3>Five Waves, One Checkpoint</h3>
+        <p>Hostile drones escalate wave over wave — four in the first push, thirteen by the last. Hold until the checkpoint is secured, or go down trying. Every run tracks how far you got and how many you took with you.</p>
+      </div>
+      <div class="mode-card pvp">
+        <span class="tag">HEAD-TO-HEAD</span>
+        <h3>Face Another Player</h3>
+        <p>Host a match and send the code to someone, or join theirs. First one standing wins. It's played over a live connection, so expect the honest feel of a scrappy online match rather than a perfectly smooth one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Under the hood</div>
+    <h2>What's actually in the loadout</h2>
+    <div class="loadout-list">
+      <div class="loadout-row">
+        <div class="name">Your own hands</div>
+        <div class="desc">A visible weapon rig with gloved hands gripping the foregrip and pistol grip — not just a floating gun.</div>
+      </div>
+      <div class="loadout-row">
+        <div class="name">A real reload</div>
+        <div class="desc">Empty the mag and the whole rig dips, the spent magazine drops, a fresh one slides home, and the bolt racks — not a menu, an animation.</div>
+      </div>
+      <div class="loadout-row">
+        <div class="name">Hostiles that move like it</div>
+        <div class="desc">Enemies walk with a real gait and switch to a lunging attack the moment they close the distance, instead of gliding at you.</div>
+      </div>
+      <div class="loadout-row">
+        <div class="name">Sound built from scratch</div>
+        <div class="desc">Every footstep, gunshot, and confirmed kill is synthesized live in your browser — nothing to download separately, nothing to fail to load.</div>
+      </div>
+      <div class="loadout-row">
+        <div class="name">Lit like it means it</div>
+        <div class="desc">A dusk sky, real-time shadows, and a manual bloom pass make muzzle flashes and tracers actually glow.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Before you deploy</div>
+    <h2>How to run it</h2>
+    <div class="run-grid">
+      <div>
+        <h4>Controls</h4>
+        <div class="keycap-row">
+          <span class="keycap">W A S D — move</span>
+          <span class="keycap">Mouse — aim</span>
+        </div>
+        <div class="keycap-row">
+          <span class="keycap">Click — fire</span>
+          <span class="keycap">R — reload</span>
+          <span class="keycap">Esc — pause</span>
+        </div>
+      </div>
+      <div>
+        <h4>What you need</h4>
+        <ul>
+          <li>A modern desktop browser (Chrome, Firefox, Edge, Safari)</li>
+          <li>No install — open the file and press Deploy</li>
+          <li>For Head-to-Head, an opponent with the same room code</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note"><strong>Heads up:</strong> this is a single HTML file built to run entirely in your browser. Head-to-Head play depends on a live connection between both players and will feel a beat behind real time rather than instant — that's the honest trade-off of a browser-based match, not a bug.</div>
+  </section>
+
+  <footer>
+    <div class="foot-word">Buckmoon Shooter — built to run from one file.</div>
+    <a href="signal-run.html">Play now →</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
